@@ -74,7 +74,7 @@ test('Set Style Properties', (t) => {
         },
         numberFormat: '0.00##%', // §18.8.30 numFmt (Number Format)
         protection: {
-            locked: true
+            locked: false
         }
     });
 
@@ -121,7 +121,7 @@ test('Set Style Properties', (t) => {
     t.ok(styleObj.fill.patternType === 'solid', 'fill.patternType correctly set');
     t.ok(styleObj.fill.fgColor === 'FFFFFF00', 'fill.fgColor correctly set');
     t.ok(styleObj.fill.bgColor === undefined, 'fill.bgColor correctly not set');
-    t.ok(styleObj.protection.locked === true, 'protection.locked correctly set');
+    t.ok(styleObj.protection.locked === false, 'protection.locked correctly set');
 
     let alignmentXMLele = xmlbuilder.create('test');
     style.alignment.addToXMLele(alignmentXMLele);
@@ -131,7 +131,7 @@ test('Set Style Properties', (t) => {
     let protectionXMLele = xmlbuilder.create('test');
     style.protection.addToXMLele(protectionXMLele);
     let protectionXMLString = protectionXMLele.doc().end();
-    t.ok(protectionXMLString === '<?xml version="1.0"?><test><protection locked="1"/></test>', 'Protection XML generated successfully');
+    t.ok(protectionXMLString === '<?xml version="1.0"?><test><protection locked="0"/></test>', 'Protection XML generated successfully');
 
     let fontXMLele = xmlbuilder.create('test');
     style.font.addToXMLele(fontXMLele);
