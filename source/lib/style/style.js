@@ -6,6 +6,7 @@ const Border = require('./classes/border.js');
 const Fill = require('./classes/fill.js');
 const Font = require('./classes/font.js');
 const NumberFormat = require('./classes/numberFormat.js');
+const Protection = require('./classes/protection.js');
 
 let _getFontId = (wb, font) => {
 
@@ -88,7 +89,7 @@ let _getNumFmt = (wb, val) => {
             horizontal: ['center', 'centerContinuous', 'distributed', 'fill', 'general', 'justify', 'left', 'right'],
             indent: integer, // Number of spaces to indent = indent value * 3
             justifyLastLine: boolean,
-            readingOrder: ['contextDependent', 'leftToRight', 'rightToLeft'], 
+            readingOrder: ['contextDependent', 'leftToRight', 'rightToLeft'],
             relativeIndent: integer, // number of additional spaces to indent
             shrinkToFit: boolean,
             textRotation: integer, // number of degrees to rotate text counter-clockwise
@@ -142,7 +143,10 @@ let _getNumFmt = (wb, val) => {
             patternType: 'solid',
             color: 'Yellow'
         },
-        numberFormat: integer or string // §18.8.30 numFmt (Number Format)
+        numberFormat: integer or string // §18.8.30 numFmt (Number Format),
+        protection: {
+            locked: boolean
+        }
     }
 */
 class Style {
@@ -157,6 +161,7 @@ class Style {
          * @param {Object} opts.font Options for creating a Font instance
          * @param {Object} opts.border Options for creating a Border instance
          * @param {Object} opts.fill Options for creating a Fill instance
+         * @param {Object} opts.protection Options for protecting instance
          * @param {String} opts.numberFormat
          * @property {Alignment} alignment Alignment instance associated with Style
          * @property {Border} border Border instance associated with Style
@@ -167,7 +172,7 @@ class Style {
          * @property {Number} fontId ID of Font instance in the Workbook
          * @property {String} numberFormat String represenation of the way a number should be formatted
          * @property {Number} xf XF id of the Style in the Workbook
-         * @returns {Style} 
+         * @returns {Style}
          */
         opts = opts ? opts : {};
 
@@ -175,21 +180,25 @@ class Style {
             this.alignment = new Alignment(opts.alignment);
         }
 
-        if (opts.border !== undefined) {  
-            this.borderId = _getBorderId(wb, opts.border); // attribute 0 based index
-            this.border = wb.styleData.borders[this.borderId];  
+        if (opts.protection !== undefined) {
+            this.protection = new Protection(opts.protection);
         }
-        if (opts.fill !== undefined) {  
+
+        if (opts.border !== undefined) {
+            this.borderId = _getBorderId(wb, opts.border); // attribute 0 based index
+            this.border = wb.styleData.borders[this.borderId];
+        }
+        if (opts.fill !== undefined) {
             this.fillId = _getFillId(wb, opts.fill); // attribute 0 based index
             this.fill = wb.styleData.fills[this.fillId];
         }
 
-        if (opts.font !== undefined) {  
+        if (opts.font !== undefined) {
             this.fontId = _getFontId(wb, opts.font); // attribute 0 based index
             this.font = wb.styleData.fonts[this.fontId];
         }
 
-        if (opts.numberFormat !== undefined) {  
+        if (opts.numberFormat !== undefined) {
             if (typeof opts.numberFormat === 'number' && opts.numberFormat <= 164) {
                 this.numFmtId = opts.numberFormat;
             } else if (typeof opts.numberFormat === 'string') {
@@ -239,11 +248,16 @@ class Style {
             thisXF.alignment = this.alignment;
         }
 
+        if (this.protection instanceof Protection) {
+            thisXF.applyProtection = 1;
+            thisXF.protection = this.protection;
+        }
+
         return thisXF;
     }
 
 
-    /** 
+    /**
      * @func Style.toObject
      * @desc Converts the Style instance to a javascript object
      * @returns {Object}
@@ -273,6 +287,10 @@ class Style {
             obj.alignment = this.alignment.toObject();
         }
 
+        if (this.protection instanceof Protection) {
+            obj.protection = this.protection.toObject();
+        }
+
         if (this.pivotButton !== undefined) {
             obj.pivotButton = this.pivotButton;
         }
@@ -281,7 +299,7 @@ class Style {
             obj.quotePrefix = this.quotePrefix;
         }
 
-        return obj;   
+        return obj;
     }
 
     /**
@@ -294,12 +312,12 @@ class Style {
         let thisEle = ele.ele('xf');
         let thisXF = this.xf;
         Object.keys(thisXF).forEach((a) => {
-            if (a === 'alignment') {
+            if (a === 'alignment' || a === 'protection') {
                 thisXF[a].addToXMLele(thisEle);
             } else {
                 thisEle.att(a, thisXF[a]);
             }
-        });        
+        });
     }
 
     /**
@@ -325,6 +343,10 @@ class Style {
 
         if (this.alignment instanceof Alignment) {
             this.alignment.addToXMLele(thisEle);
+        }
+
+        if (this.protection instanceof Protection) {
+            this.protection.addToXMLele(thisEle);
         }
 
         if (this.border instanceof Border) {
