@@ -11,8 +11,8 @@ let _addSheetPr = (promiseObj) => {
 
         // Check if any option that would require the sheetPr element to be added exists
         if (
-            o.printOptions.fitToHeight !== null || 
-            o.printOptions.fitToWidth !== null || 
+            o.printOptions.fitToHeight !== null ||
+            o.printOptions.fitToWidth !== null ||
             o.outline.summaryBelow !== null ||
             o.autoFilter.ref !== null ||
             o.outline.summaryRight
@@ -123,7 +123,7 @@ let _addCols = (promiseObj) => {
             for (let colId in promiseObj.ws.cols) {
                 let col = promiseObj.ws.cols[colId];
                 let colEle = colsEle.ele('col');
-                
+
                 col.min !== null ? colEle.att('min', col.min) : null;
                 col.max !== null ? colEle.att('max', col.max) : null;
                 col.width !== null ? colEle.att('width', col.width) : null;
@@ -156,7 +156,7 @@ let _addSheetData = (promiseObj) => {
                 let rEle = ele.ele('row');
 
                 rEle.att('r', thisRow.r);
-                rEle.att('spans', thisRow.spans);
+                // rEle.att('spans', thisRow.spans);
                 thisRow.s !== null ? rEle.att('s', thisRow.s) : null;
                 thisRow.customFormat !== null ? rEle.att('customFormat', thisRow.customFormat) : null;
                 thisRow.ht !== null ? rEle.att('ht', thisRow.ht) : null;
@@ -170,7 +170,7 @@ let _addSheetData = (promiseObj) => {
                 for (var i = 0; i < thisRow.cellRefs.length; i++) {
                     promiseObj.ws.cells[thisRow.cellRefs[i]].addToXMLele(rEle);
                 }
-                
+
                 rEle.up();
             }
 
@@ -216,7 +216,7 @@ let _addSheetProtection = (promiseObj) => {
                     } else {
                         ele.att(k, utils.boolToInt(o[k]));
                     }
-                }            
+                }
             });
             ele.up();
         }
@@ -265,10 +265,10 @@ let _addAutoFilter = (promiseObj) => {
                 localSheetId: promiseObj.ws.localSheetId,
                 name: '_xlnm._FilterDatabase',
                 refFormula: '\'' + promiseObj.ws.name + '\'!' +
-                    '$' + utils.getExcelAlpha(o.startCol) + 
+                    '$' + utils.getExcelAlpha(o.startCol) +
                     '$' + o.startRow +
                     ':' +
-                    '$' + utils.getExcelAlpha(o.endCol) + 
+                    '$' + utils.getExcelAlpha(o.endCol) +
                     '$' + o.endRow
             });
             ele.up();
@@ -507,13 +507,13 @@ let relsXML = (ws) => {
 
         if (sheetRelRequired === false) {
             resolve();
-        } 
+        }
 
         let relXML = xml.create(
             'Relationships',
             {
-                'version': '1.0', 
-                'encoding': 'UTF-8', 
+                'version': '1.0',
+                'encoding': 'UTF-8',
                 'standalone': true
             }
         );
@@ -526,7 +526,7 @@ let relsXML = (ws) => {
                 .att('Id', rId)
                 .att('Target', r.location)
                 .att('TargetMode', 'External')
-                .att('Type', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink');                
+                .att('Type', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink');
             } else if (r === 'drawing') {
                 relXML.ele('Relationship')
                 .att('Id', rId)
@@ -540,4 +540,3 @@ let relsXML = (ws) => {
 };
 
 module.exports = { sheetXML, relsXML };
-
