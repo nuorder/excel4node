@@ -16,11 +16,11 @@ test('Set Style Properties', (t) => {
 
     let wb = new xl.Workbook();
     let style = wb.createStyle({
-        alignment: { 
+        alignment: {
             horizontal: 'center',
             indent: 1, // Number of spaces to indent = indent value * 3
             justifyLastLine: true,
-            readingOrder: 'leftToRight', 
+            readingOrder: 'leftToRight',
             relativeIndent: 1, // number of additional spaces to indent
             shrinkToFit: false,
             textRotation: 0, // number of degrees to rotate text counter-clockwise
@@ -72,7 +72,10 @@ test('Set Style Properties', (t) => {
             patternType: 'solid',
             fgColor: 'Yellow'
         },
-        numberFormat: '0.00##%' // §18.8.30 numFmt (Number Format)
+        numberFormat: '0.00##%', // §18.8.30 numFmt (Number Format)
+        protection: {
+            locked: false
+        }
     });
 
     t.ok(style instanceof Style, 'Style object successfully created');
@@ -118,11 +121,17 @@ test('Set Style Properties', (t) => {
     t.ok(styleObj.fill.patternType === 'solid', 'fill.patternType correctly set');
     t.ok(styleObj.fill.fgColor === 'FFFFFF00', 'fill.fgColor correctly set');
     t.ok(styleObj.fill.bgColor === undefined, 'fill.bgColor correctly not set');
+    t.ok(styleObj.protection.locked === false, 'protection.locked correctly set');
 
     let alignmentXMLele = xmlbuilder.create('test');
     style.alignment.addToXMLele(alignmentXMLele);
     let alignmentXMLString = alignmentXMLele.doc().end();
     t.ok(alignmentXMLString === '<?xml version="1.0"?><test><alignment horizontal="center" indent="1" justifyLastLine="1" readingOrder="leftToRight" relativeIndent="1" textRotation="0" vertical="bottom" wrapText="1"/></test>', 'Alignment XML generated successfully');
+
+    let protectionXMLele = xmlbuilder.create('test');
+    style.protection.addToXMLele(protectionXMLele);
+    let protectionXMLString = protectionXMLele.doc().end();
+    t.ok(protectionXMLString === '<?xml version="1.0"?><test><protection locked="0"/></test>', 'Protection XML generated successfully');
 
     let fontXMLele = xmlbuilder.create('test');
     style.font.addToXMLele(fontXMLele);
@@ -232,7 +241,7 @@ test('Validate borders on cellBlocks', (t) => {
     t.ok(wb.styles[ws.cell(2,5).cells[0].s].border.right === undefined, 'Right side of top left cell should NOT have a border if outline is set to true');
     t.ok(wb.styles[ws.cell(2,5).cells[0].s].border.bottom === undefined, 'Bottom side of top left cell should NOT have a border if outline is set to true');
 
-    t.end(); 
+    t.end();
 });
 
 test('Use Workbook default fonts', (t) => {
